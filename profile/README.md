@@ -5,22 +5,20 @@
 Your code validates what is being done.  
 ActGuard validates whether it *should* be done, given **how we got here**.
 
-Traditional checks handle one call at a time. Agent failures often happen **across calls**:
-hallucinated IDs carried between steps, retry loops, and budget drift over a session.
+Agent failures usually happen **across calls**, not inside a single function: wrong IDs carried between steps, retry storms, and budget drift over a session.
 
 ---
 
-## What ActGuard covers
+## Why agents break (and what ActGuard prevents)
 
-| Concern | Typical solution | ActGuard |
-|---|---|---|
-| Is the input valid? | `if/else` | — |
-| Is the caller authorized? | RBAC / Auth | — |
-| Is the amount within limits? | Business logic | — |
-| Did the agent hallucinate an ID? | — | ✅ |
-| Did required steps happen before this action? | — | ✅ |
-| Is the agent retrying in a loop? | — | ✅ |
-| Is the session within cost budget? | — | ✅ |
+| Real-world problem | What actually happens | ActGuard |
+|--------------------|----------------------|----------|
+| Made-up data | Agent uses an ID it never fetched | ✅ |
+| Lost context | Correct ID fetched → wrong one used later | ✅ |
+| Endless retries | Same tool called over and over with tiny changes | ✅ |
+| Runaway costs | Agent keeps exploring and silently spends | ✅ |
+| Skipped workflow steps | Performs side effect before required step | ✅ |
+| Obeying malicious input | Untrusted text tells it to do something destructive | ✅ |
 
 ---
 
@@ -97,3 +95,30 @@ def search_web(user_id: str, query: str, *, idempotency_key: str) -> str:
 with RunContext():
     search_web("alice", "latest earnings", idempotency_key="req-1")
 ```
+
+# Install
+
+```bash
+pip install actguard
+```
+
+# Quick links
+- 📘 [Getting Started](https://github.com/ActGuard/actguard/blob/main/docs/getting-started.md)
+- 🧰 [Tool Guards](https://github.com/ActGuard/actguard/blob/main/docs/tool-guards.md)
+- 🔎 [API Reference](https://github.com/ActGuard/actguard/blob/main/docs/api-reference.md)
+
+# Repo structure
+
+```bash
+actguard/
+├── docs/           # Documentation
+├── examples/       # Usage examples
+└── libs/
+    ├── sdk-py/     # Python SDK
+    └── sdk-js/     # JavaScript/Node.js SDK (in progress)
+```
+
+# Contributing / Development
+
+Python SDK setup, tests, and lint commands live in libs/sdk-py/.
+
